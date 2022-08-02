@@ -5,5 +5,10 @@
  * @returns {object} - returns the new object
  */
 export const pick = (obj, ...fields) => {
-
+  return fields.reduce((acc, cur) => {
+    if (cur in obj) {
+      acc[cur] = obj[cur];
+    }
+    return acc;
+  }, {});
 };
