@@ -4,5 +4,16 @@
  * @returns {*[]} - the new array with uniq values
  */
 export function uniq(arr) {
+  if (!arr || !arr.length) {
+    return [];
+  }
 
+  const set = new Set();
+  return arr.reduce((acc, cur) => {
+    if (!set.has(cur)) {
+      set.add(cur);
+      acc.push(cur);
+    }
+    return acc;
+  }, []);
 }
