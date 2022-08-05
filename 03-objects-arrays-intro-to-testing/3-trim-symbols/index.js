@@ -16,7 +16,7 @@ export function trimSymbols(string, size) {
   const charArr = []; // is it better to use an array and then arr.join('') or to concatenate strings in a loop?
 
   for (let char of string) {
-    charCounter[char] = charCounter[char] ? charCounter[char] + 1 : 1;
+    charCounter[char] = (charCounter[char] || 0) + 1;
 
     const lastInd = charArr.length - 1;
     if (lastInd >= 0 && charArr[lastInd] !== char) {
