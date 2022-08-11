@@ -37,10 +37,21 @@ export default class ColumnChart {
     this.remove();
   }
 
-  getChartItems() {
+  formatDataItem(num, maxValue) {
+    const scale = this.chartHeight / maxValue;
+    return {
+      percent: (num / maxValue * 100).toFixed(0) + '%',
+      value: String(Math.floor(num * scale))
+    };
+  }
+
+  getChartColumns() {
     const maxValue = Math.max(...this.data);
-    const scale = 50 / maxValue;
-    return this.data.map(num => `<div style="--value: ${String(Math.floor(num * scale))}" data-tooltip="${(num / maxValue * 100).toFixed(0)}%"></div>`).join('');
+    return this.data.map(num => {
+      const {percent, value} = this.formatDataItem(num, maxValue);
+      return `<div style="--value: ${value}" data-tooltip="${percent}"></div>`;
+    }
+    ).join('');
   }
 
   remove() {
@@ -60,7 +71,7 @@ export default class ColumnChart {
         <div class="column-chart__container">
           <div data-element="header" class="column-chart__header">${this.getHeading()}</div>
           <div data-element="body" class="column-chart__chart">
-            ${this.getChartItems()}
+            ${this.getChartColumns()}
           </div>
         </div>
       </div>
