@@ -2,13 +2,13 @@ export default class ColumnChart {
   chartHeight = 50;
 
   constructor({
-    data,
-    label,
-    link,
-    value,
-    formatHeading
-  } = {data: [], label: '', link: '', value: null}) {
-    this.data = [...(data || [])];
+    data = [],
+    label = '',
+    link = '',
+    value = 0,
+    formatHeading = data => data
+  } = {}) {
+    this.data = [...data];
     this.label = label;
     this.link = link;
     this.value = value;
@@ -22,13 +22,11 @@ export default class ColumnChart {
   }
 
   getHeading() {
-    return this.formatHeading ?
-      this.formatHeading(this.value) :
-      this.value;
+    return this.formatHeading(this.value);
   }
 
-  update(data) {
-    this.data = [...(data || [])];
+  update(data = []) {
+    this.data = [...data];
     this.destroy();
     this.render();
   }
@@ -50,8 +48,7 @@ export default class ColumnChart {
     return this.data.map(num => {
       const {percent, value} = this.formatDataItem(num, maxValue);
       return `<div style="--value: ${value}" data-tooltip="${percent}"></div>`;
-    }
-    ).join('');
+    }).join('');
   }
 
   remove() {
