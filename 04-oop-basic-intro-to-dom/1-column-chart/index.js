@@ -1,5 +1,6 @@
 export default class ColumnChart {
   chartHeight = 50;
+  subElements = {};
 
   constructor({
     data = [],
@@ -25,16 +26,6 @@ export default class ColumnChart {
     return this.formatHeading(this.value);
   }
 
-  update(data = []) {
-    this.data = [...data];
-    this.destroy();
-    this.render();
-  }
-
-  destroy() {
-    this.remove();
-  }
-
   formatDataItem(num, maxValue) {
     const scale = this.chartHeight / maxValue;
     return {
@@ -51,8 +42,33 @@ export default class ColumnChart {
     }).join('');
   }
 
+  getSubElements() {
+    const result = {};
+    const elements = this.element.querySelectorAll("[data-element]");
+
+    for (const subElement of elements) {
+      const name = subElement.dataset.element;
+      result[name] = subElement;
+    }
+
+    return result;
+  }
+
+  update(data = []) {
+    this.data = [...data];
+    this.subElements.body.innerHTML = this.getChartColumns();
+  }
+
+  destroy() {
+    this.remove();
+    this.element = null;
+    this.subElements = {};
+  }
+
   remove() {
-    this.element.remove();
+    if (this.element) {
+      this.element.remove();
+    }
   }
 
   render() {
@@ -75,6 +91,6 @@ export default class ColumnChart {
     `;
 
     this.element = div;
-    document.body.append(div);
+    this.subElements = this.getSubElements();
   }
 }
