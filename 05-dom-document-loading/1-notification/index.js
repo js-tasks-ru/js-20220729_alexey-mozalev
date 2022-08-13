@@ -1,4 +1,6 @@
 export default class NotificationMessage {
+  static existingElement = null;
+
   constructor(message = '', {duration = 3000, type = 'success'} = {}) {
     this.message = message;
     this.duration = duration;
@@ -32,6 +34,11 @@ export default class NotificationMessage {
     div.innerHTML = this.template;
 
     this.element = div.firstElementChild;
+
+    if (NotificationMessage.existingElement) {
+      NotificationMessage.existingElement.remove();
+    }
+    NotificationMessage.existingElement = this.element;
   }
 
   show(outerElement) {
@@ -50,5 +57,6 @@ export default class NotificationMessage {
   destroy() {
     this.remove();
     this.element = null;
+    NotificationMessage.existingElement = null;
   }
 }
