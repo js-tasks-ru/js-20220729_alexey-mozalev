@@ -29,16 +29,19 @@ export default class NotificationMessage {
     `;
   }
 
+  removeExistingNotification() {
+    if (NotificationMessage.existingElement) {
+      NotificationMessage.existingElement.remove();
+    }
+    NotificationMessage.existingElement = this.element;
+  }
+
   render() {
     const div = document.createElement('div');
     div.innerHTML = this.template;
 
     this.element = div.firstElementChild;
-
-    if (NotificationMessage.existingElement) {
-      NotificationMessage.existingElement.remove();
-    }
-    NotificationMessage.existingElement = this.element;
+    this.removeExistingNotification();
   }
 
   show(outerElement) {
