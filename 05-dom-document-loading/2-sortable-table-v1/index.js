@@ -1,5 +1,5 @@
 export default class SortableTable {
-  subElements = [];
+  subElements = {};
 
   constructor(headerConfig = [], data = []) {
     this.headerConfig = [...headerConfig];
@@ -21,13 +21,24 @@ export default class SortableTable {
       'desc': 'lower'
     };
 
-    const compareFn = (obj1, obj2) => {
+    const strCompareFn = (obj1, obj2) => {
       return ORDER[orderValue] * obj1[fieldValue].localeCompare(obj2[fieldValue], ['ru', 'en'],
         {caseFirst: CASE[orderValue]}
       );
     };
 
-    this.data.sort(compareFn);
+    const numCompareFn = (obj1, obj2) => ORDER[orderValue] * (obj1[fieldValue] - obj2[fieldValue]);
+
+    const getCompareFn = (obj1, obj2) => {
+      switch (typeof obj1[fieldValue]) {
+      case 'string':
+        return strCompareFn(obj1, obj2);
+      case 'number':
+        return numCompareFn(obj1, obj2);
+      }
+    };
+
+    this.data.sort(getCompareFn);
     this.updateBody();
   }
 
@@ -115,6 +126,7 @@ export default class SortableTable {
   destroy() {
     this.remove();
     this.element = null;
+    this.subElements = {};
   }
 }
 
