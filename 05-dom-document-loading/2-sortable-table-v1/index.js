@@ -48,19 +48,13 @@ export default class SortableTable {
   }
 
   get header() {
-    const items = this.headerConfig.map(item => {
+    return this.headerConfig.map(item => {
       return `
         <div class="sortable-table__cell" data-id="${item.id}" data-sortable="${item.sortable}">
           <span>${item.title}</span>
         </div>
       `;
     }).join('');
-
-    return `
-      <div data-element="header" class="sortable-table__header sortable-table__row">
-        ${items}
-      </div>
-    `;
   }
 
   getTableRow(product) {
@@ -81,28 +75,26 @@ export default class SortableTable {
   }
 
   get body() {
-    const products = this.data.map(this.getTableRow).join('');
-
-    return `
-      <div data-element="body" class="sortable-table__body">
-        ${products}
-      </div>
-    `;
+    return this.data.map(this.getTableRow).join('');
   }
 
   get template() {
     return `
-        <div class="sortable-table">
+      <div class="sortable-table">
+        <div data-element="header" class="sortable-table__header sortable-table__row">
           ${this.header}
+        </div>
+        <div data-element="body" class="sortable-table__body">
           ${this.body}
-          <div data-element="loading" class="loading-line sortable-table__loading-line"></div>
+        </div>
+        <div data-element="loading" class="loading-line sortable-table__loading-line"></div>
 
-          <div data-element="emptyPlaceholder" class="sortable-table__empty-placeholder">
-            <div>
-              <p>No products satisfies your filter criteria</p>
-              <button type="button" class="button-primary-outline">Reset all filters</button>
-            </div>
+        <div data-element="emptyPlaceholder" class="sortable-table__empty-placeholder">
+          <div>
+            <p>No products satisfies your filter criteria</p>
+            <button type="button" class="button-primary-outline">Reset all filters</button>
           </div>
+        </div>
       </div>
     `;
   }
