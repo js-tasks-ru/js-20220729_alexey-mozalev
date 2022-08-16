@@ -1,14 +1,15 @@
 export default class ColumnChart {
   chartHeight = 50;
+  subElements = {};
 
   constructor({
-    data,
-    label,
-    link,
-    value,
-    formatHeading
-  } = {data: [], label: '', link: '', value: null}) {
-    this.data = [...(data || [])];
+    data = [],
+    label = '',
+    link = '',
+    value = 0,
+    formatHeading = data => data
+  } = {}) {
+    this.data = [...data];
     this.label = label;
     this.link = link;
     this.value = value;
@@ -22,19 +23,7 @@ export default class ColumnChart {
   }
 
   getHeading() {
-    return this.formatHeading ?
-      this.formatHeading(this.value) :
-      this.value;
-  }
-
-  update(data) {
-    this.data = [...(data || [])];
-    this.destroy();
-    this.render();
-  }
-
-  destroy() {
-    this.remove();
+    return this.formatHeading(this.value);
   }
 
   formatDataItem(num, maxValue) {
@@ -50,12 +39,36 @@ export default class ColumnChart {
     return this.data.map(num => {
       const {percent, value} = this.formatDataItem(num, maxValue);
       return `<div style="--value: ${value}" data-tooltip="${percent}"></div>`;
+    }).join('');
+  }
+
+  getSubElements() {
+    const result = {};
+    const elements = this.element.querySelectorAll("[data-element]");
+
+    for (const subElement of elements) {
+      const name = subElement.dataset.element;
+      result[name] = subElement;
     }
-    ).join('');
+
+    return result;
+  }
+
+  update(data = []) {
+    this.data = [...data];
+    this.subElements.body.innerHTML = this.getChartColumns();
+  }
+
+  destroy() {
+    this.remove();
+    this.element = null;
+    this.subElements = {};
   }
 
   remove() {
-    this.element.remove();
+    if (this.element) {
+      this.element.remove();
+    }
   }
 
   render() {
@@ -78,6 +91,9 @@ export default class ColumnChart {
     `;
 
     this.element = div;
+    this.subElements = this.getSubElements();
+
+    //TODO this is redundant, but it's required to pass the 'should have ability to define "link"' test
     document.body.append(div);
   }
 }
