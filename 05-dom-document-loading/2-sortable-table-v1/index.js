@@ -40,10 +40,20 @@ export default class SortableTable {
 
     this.data.sort(getCompareFn);
     this.updateBody();
+    this.updateHeaderSortArrow(fieldValue, orderValue);
   }
 
   updateBody() {
     this.subElements.body.innerHTML = this.body;
+  }
+
+  updateHeaderSortArrow(fieldValue, orderValue) {
+    const prevSortedHeader = this.subElements.header.querySelector("[data-order]");
+    if (prevSortedHeader) {
+      prevSortedHeader.removeAttribute("data-order");
+    }
+    const curSortedHeader = this.subElements.header.querySelector(`[data-id="${fieldValue}"]`);
+    curSortedHeader.setAttribute('data-order', orderValue);
   }
 
   getSubElements() {
@@ -63,6 +73,9 @@ export default class SortableTable {
       return `
         <div class="sortable-table__cell" data-id="${item.id}" data-sortable="${item.sortable}">
           <span>${item.title}</span>
+          <span data-element="arrow" class="sortable-table__sort-arrow">
+            <span class="sort-arrow"></span>
+          </span>
         </div>
       `;
     }).join('');
