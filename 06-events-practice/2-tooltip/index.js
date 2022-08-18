@@ -1,6 +1,14 @@
 class Tooltip {
+  static tooltip = null;
   element = null;
   prevTarget = null;
+
+  constructor() {
+    if (!Tooltip.tooltip) {
+      Tooltip.tooltip = this;
+    }
+    return Tooltip.tooltip;
+  }
 
   initialize() {
     document.body.addEventListener('pointerover', this.onPointerOverHandler);
@@ -60,6 +68,7 @@ class Tooltip {
     this.remove();
     this.element = null;
     this.prevTarget = null;
+    Tooltip.tooltip = null;
   }
 }
 
