@@ -15,12 +15,12 @@ export default class SortableTable {
   }
 
   headerPointerdownHandler = (event) => {
-    const {id} = event.target.closest('div').dataset;
-    if (!id) {
+    const elem = event.target.closest("[data-sortable='true']")?.dataset;
+    if (!elem?.id) {
       return;
     }
 
-    this.sort(id, this.sorted.order);
+    this.sort(elem.id, this.sorted.order);
   };
 
   initEventListeners() {
