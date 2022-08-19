@@ -2,6 +2,7 @@ class Tooltip {
   static tooltip = null;
   element = null;
   prevTarget = null;
+  offset = 10;
 
   constructor() {
     if (!Tooltip.tooltip) {
@@ -13,10 +14,10 @@ class Tooltip {
   initialize() {
     document.body.addEventListener('pointerover', this.onPointerOverHandler);
     document.body.addEventListener('pointerout', this.onPointerOutHandler);
-    document.body.addEventListener('mousemove', this.onMouseMoveHandler);
   }
 
   onPointerOverHandler = (event) => {
+    document.body.addEventListener('pointermove', this.onMouseMoveHandler);
     this.render();
 
     const target = event.target;
@@ -32,12 +33,13 @@ class Tooltip {
     const target = event.target;
     if (this.prevTarget === target) {
       this.remove();
+      document.body.removeEventListener('pointermove', this.onMouseMoveHandler);
     }
   };
 
   onMouseMoveHandler = (event) => {
-    this.element.style.top = `${event.clientY + 10}px`;
-    this.element.style.left = `${event.clientX + 10}px`;
+    this.element.style.top = `${event.clientY + this.offset}px`;
+    this.element.style.left = `${event.clientX + this.offset}px`;
   };
 
   get template() {
@@ -46,15 +48,11 @@ class Tooltip {
     `;
   }
 
-  render(parent = document.body) {
+  render() {
     const div = document.createElement('div');
     div.innerHTML = this.template;
     this.element = div.firstElementChild;
 
-    //TODO commented code somehow doesn't work in the 'should be rendered correctly' test
-    // if (parent) {
-    //   parent.append(this.element);
-    // }
     document.body.append(this.element);
   }
 
@@ -65,6 +63,9 @@ class Tooltip {
   }
 
   destroy() {
+    document.body.removeEventListener('pointerover', this.onPointerOverHandler);
+    document.body.removeEventListener('pointerout', this.onPointerOutHandler);
+    document.body.removeEventListener('pointermove', this.onMouseMoveHandler);
     this.remove();
     this.element = null;
     this.prevTarget = null;
