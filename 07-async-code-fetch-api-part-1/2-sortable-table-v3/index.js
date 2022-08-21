@@ -55,9 +55,9 @@ export default class SortableTable {
     }
 
     this.updateSortedFieldData(elem.id);
-    this.showSpinner();
+    this.toShowSpinner(true);
     await this.sort(elem.id, this.sorted.order);
-    this.hideSpinner();
+    this.toShowSpinner(false);
     this.updateBodyElements();
     this.updateHeaderSortArrow(elem.id, this.sorted.order);
   };
@@ -135,12 +135,20 @@ export default class SortableTable {
     this.updateHeaderSortArrow(fieldValue, orderValue);
   }
 
-  showSpinner() {
-    this.subElements.loading.style.display = 'block';
+  toShowSpinner(toShow) {
+    if (toShow) {
+      this.subElements.loading.style.display = 'block';
+    } else {
+      this.subElements.loading.style.display = 'none';
+    }
   }
 
-  hideSpinner() {
-    this.subElements.loading.style.display = 'none';
+  toShowEmptyPlaceholder(toShow) {
+    if (toShow) {
+      this.subElements.emptyPlaceholder.style.display = 'block';
+    } else {
+      this.subElements.emptyPlaceholder.style.display = 'none';
+    }
   }
 
   updateSortedFieldData(id) {
@@ -149,7 +157,13 @@ export default class SortableTable {
   }
 
   updateBodyElements() {
-    this.subElements.body.innerHTML = this.bodyElements;
+    if (this.data.length) {
+      this.toShowEmptyPlaceholder(false);
+      this.subElements.body.innerHTML = this.bodyElements;
+    } else {
+      this.subElements.body.replaceChildren();
+      this.toShowEmptyPlaceholder(true);
+    }
   }
 
   updateHeaderSortArrow(fieldValue, orderValue) {
@@ -237,9 +251,9 @@ export default class SortableTable {
     this.element = wrapper.firstElementChild;
     this.subElements = this.getSubElements();
 
-    this.showSpinner();
+    this.toShowSpinner(true);
     await this.loadData();
-    this.hideSpinner();
+    this.toShowSpinner(false);
     this.updateBodyElements();
     this.updateHeaderSortArrow(this.sorted.id, this.sorted.order);
   }
