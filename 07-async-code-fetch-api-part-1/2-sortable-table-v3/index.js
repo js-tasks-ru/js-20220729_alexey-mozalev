@@ -14,7 +14,7 @@ export default class SortableTable {
     this.headersConfig = [...headersConfig];
     this.url = `${BACKEND_URL}/${url}`;
     this.sorted = {
-      id: this.headersConfig.find(item => !!item.sortable)?.id,
+      id: this.headersConfig.find(item => !!item.sortable).id,
       order: 'asc',
       start: 0,
       end: 30,
@@ -38,8 +38,7 @@ export default class SortableTable {
       return;
     }
 
-    this.sorted.order = this.sorted.order === 'asc' ? 'desc' : 'asc';
-
+    this.updateSortedFieldData(elem.id);
     this.showSpinner();
     await this.sort(elem.id, this.sorted.order);
     this.hideSpinner();
@@ -112,9 +111,6 @@ export default class SortableTable {
       }
     };
 
-    this.sorted.id = fieldValue;
-    this.sorted.order = this.sorted.order === 'asc' ? 'desc' : 'asc';
-
     this.data.sort(getCompareFn);
     this.updateBodyElements();
     this.updateHeaderSortArrow(fieldValue, orderValue);
@@ -126,6 +122,11 @@ export default class SortableTable {
 
   hideSpinner() {
     this.subElements.loading.style.display = 'none';
+  }
+
+  updateSortedFieldData(id) {
+    this.sorted.id = id;
+    this.sorted.order = this.sorted.order === 'asc' ? 'desc' : 'asc';
   }
 
   updateBodyElements() {
