@@ -5,6 +5,8 @@ const BACKEND_URL = 'https://course-js.javascript.ru';
 export default class SortableTable {
   data = [];
   subElements = {};
+  isLoading = false;
+  scrollBottomOffset = 50;
 
   constructor(headersConfig, {
     url = '',
@@ -29,10 +31,24 @@ export default class SortableTable {
   }
 
   initEventListeners() {
-    this.subElements.header.addEventListener('pointerdown', this.headerPointerdownHandler);
+    this.subElements.header.addEventListener('pointerdown', this.headerPointerDownHandler);
+    document.addEventListener('scroll', this.onScrollHandler);
   }
 
-  headerPointerdownHandler = async (event) => {
+  onScrollHandler = async (event) => {
+    const documentHeight = document.body.scrollHeight;
+    const currentScroll = window.scrollY + window.innerHeight;
+
+    if ((currentScroll + this.scrollBottomOffset) > documentHeight && !this.isLoading) {
+      const step = this.sorted.end - this.sorted.start;
+      this.sorted.start += step;
+      this.sorted.end += step;
+      await this.loadData({});
+      this.updateBodyElements();
+    }
+  };
+
+  headerPointerDownHandler = async (event) => {
     const elem = event.target.closest("[data-sortable='true']")?.dataset;
     if (!elem?.id) {
       return;
@@ -52,6 +68,8 @@ export default class SortableTable {
     start = this.sorted.start,
     end = this.sorted.end
   } = {}) => {
+    this.isLoading = true;
+
     const url = new URL(this.url);
     Object.entries({
       _sort: id,
@@ -67,7 +85,8 @@ export default class SortableTable {
       console.error('loadData error:', e);
     }
 
-    this.data = data;
+    this.data.push(...data);
+    this.isLoading = false;
     return data;
   };
 
@@ -232,8 +251,9 @@ export default class SortableTable {
   }
 
   destroy() {
+    document.removeEventListener('scroll', this.onScrollHandler);
     if (this.subElements.header) {
-      this.subElements.header.removeEventListener('pointerdown', this.headerPointerdownHandler);
+      this.subElements.header.removeEventListener('pointerdown', this.headerPointerDownHandler);
     }
     this.remove();
     this.element = null;
