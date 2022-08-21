@@ -7,6 +7,7 @@ export default class SortableTable {
   subElements = {};
   isLoading = false;
   scrollBottomOffset = 50;
+  offset = 30;
 
   constructor(headersConfig, {
     url = '',
@@ -19,15 +20,16 @@ export default class SortableTable {
       id: this.headersConfig.find(item => !!item.sortable).id,
       order: 'asc',
       start: 0,
-      end: 30,
+      end: this.offset,
       ...sorted
     };
+    if (sorted.start && sorted.end) {
+      this.offset = sorted.end - sorted.start;
+    }
     this.isSortLocally = isSortLocally;
 
     this.render();
     this.initEventListeners();
-    // this.loadData();
-    // this.sort();
   }
 
   initEventListeners() {
@@ -41,10 +43,9 @@ export default class SortableTable {
 
     if ((currentScroll + this.scrollBottomOffset) > documentHeight && !this.isLoading) {
       this.toShowSpinner(true);
-      const step = this.sorted.end - this.sorted.start;
-      this.sorted.start += step;
-      this.sorted.end += step;
-      await this.loadData({});
+      this.sorted.start += this.offset;
+      this.sorted.end += this.offset;
+      await this.loadData();
       this.updateBodyElements();
       this.toShowSpinner(false);
     }
@@ -56,7 +57,7 @@ export default class SortableTable {
       return;
     }
 
-    this.updateSortedFieldData(elem.id);
+    this.updateQueryParams(elem.id);
     this.toShowSpinner(true);
     await this.sort(elem.id, this.sorted.order);
     this.toShowSpinner(false);
@@ -153,9 +154,13 @@ export default class SortableTable {
     }
   }
 
-  updateSortedFieldData(id) {
+  updateQueryParams(id) {
     this.sorted.id = id;
     this.sorted.order = this.sorted.order === 'asc' ? 'desc' : 'asc';
+    this.sorted.start = 0;
+    this.sorted.end = this.offset;
+
+    this.data = [];
   }
 
   updateBodyElements() {
