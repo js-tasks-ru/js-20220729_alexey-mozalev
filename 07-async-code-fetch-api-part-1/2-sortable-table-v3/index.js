@@ -40,11 +40,13 @@ export default class SortableTable {
     const currentScroll = window.scrollY + window.innerHeight;
 
     if ((currentScroll + this.scrollBottomOffset) > documentHeight && !this.isLoading) {
+      this.toShowSpinner(true);
       const step = this.sorted.end - this.sorted.start;
       this.sorted.start += step;
       this.sorted.end += step;
       await this.loadData({});
       this.updateBodyElements();
+      this.toShowSpinner(false);
     }
   };
 
