@@ -28,21 +28,31 @@ export default class SortableTable {
     // this.sort();
   }
 
-  //FIXME
-  headerPointerdownHandler = (event) => {
-    const elem = event.target.closest("[data-sortable='true']")?.dataset;
-    if (!elem?.id) {
-      return;
-    }
-    //FIXME
-    this.sort(elem.id, this.sorted.order);
-  };
-
   initEventListeners() {
     this.subElements.header.addEventListener('pointerdown', this.headerPointerdownHandler);
   }
 
-  loadData = async ({id, order, start, end} = this.sorted) => {
+  headerPointerdownHandler = async (event) => {
+    const elem = event.target.closest("[data-sortable='true']")?.dataset;
+    if (!elem?.id) {
+      return;
+    }
+
+    this.sorted.order = this.sorted.order === 'asc' ? 'desc' : 'asc';
+
+    this.showSpinner();
+    await this.sort(elem.id, this.sorted.order);
+    this.hideSpinner();
+    this.updateBodyElements();
+    this.updateHeaderSortArrow(elem.id, this.sorted.order);
+  };
+
+  loadData = async ({
+    id = this.sorted.id,
+    order = this.sorted.order,
+    start = this.sorted.start,
+    end = this.sorted.end
+  } = {}) => {
     const url = new URL(this.url);
     Object.entries({
       _sort: id,
@@ -62,17 +72,16 @@ export default class SortableTable {
     return data;
   };
 
-  sort() {
+  async sort(id, order) {
     if (this.isSortLocally) {
-      this.sortOnClient(this.sorted?.id, this.sorted?.order);
+      this.sortOnClient(id, order);
     } else {
-      this.sortOnServer(this.sorted?.id, this.sorted?.order);
+      await this.sortOnServer(id, order);
     }
   }
 
   async sortOnServer(id, order) {
-    await this.loadData();
-    this.updateBodyElements();
+    await this.loadData({id, order});
   }
 
   sortOnClient(fieldValue, orderValue) {
@@ -109,6 +118,14 @@ export default class SortableTable {
     this.data.sort(getCompareFn);
     this.updateBodyElements();
     this.updateHeaderSortArrow(fieldValue, orderValue);
+  }
+
+  showSpinner() {
+    this.subElements.loading.style.display = 'block';
+  }
+
+  hideSpinner() {
+    this.subElements.loading.style.display = 'none';
   }
 
   updateBodyElements() {
@@ -200,11 +217,11 @@ export default class SortableTable {
     this.element = wrapper.firstElementChild;
     this.subElements = this.getSubElements();
 
-    this.subElements.loading.style.display = 'block';
+    this.showSpinner();
     await this.loadData();
-    this.subElements.loading.style.display = 'none';
-
+    this.hideSpinner();
     this.updateBodyElements();
+    this.updateHeaderSortArrow(this.sorted.id, this.sorted.order);
   }
 
   remove() {
