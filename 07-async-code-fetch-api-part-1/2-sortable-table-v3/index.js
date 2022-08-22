@@ -28,6 +28,7 @@ export default class SortableTable {
     }
     this.isSortLocally = isSortLocally;
 
+    this.createElement();
     this.render();
     this.initEventListeners();
   }
@@ -252,12 +253,14 @@ export default class SortableTable {
     `;
   }
 
-  async render() {
+  createElement() {
     const wrapper = document.createElement('div');
     wrapper.innerHTML = this.template;
     this.element = wrapper.firstElementChild;
     this.subElements = this.getSubElements();
+  }
 
+  async render() {
     this.toShowSpinner(true);
     await this.loadData();
     this.toShowSpinner(false);
