@@ -35,7 +35,7 @@ export default class ProductForm {
     try {
       data = await Promise.all(urls.map(url => fetchJson(url)));
       this.categories = data?.[0] || [];
-      this.product = data?.[1];
+      this.product = data?.[1][0];
     } catch (e) {
       console.error('loadData Error:', e);
     }
@@ -56,17 +56,47 @@ export default class ProductForm {
   }
 
   updateFormElements() {
-    this.subElements.productForm.elements['subcategory'].innerHTML = this.getCategoriesElements();
+    this.subElements.productForm.elements['subcategory'].innerHTML = this.getCategoryElements();
+    this.subElements.imageListContainer.firstElementChild.innerHTML = this.getImageElements();
+
+    for (const elem of this.subElements.productForm.elements) {
+      const name = elem.getAttribute('name');
+      if (this.product[name]) {
+        elem.value = this.product[name];
+      }
+    }
   }
 
-  getCategoriesElements() {
+  getCategoryElements() {
     const options = [];
     for (const category of this.categories) {
       for (const subcategory of category.subcategories) {
         options.push(`<option value="${subcategory.id}">${category.title} &gt; ${subcategory.title}</option>`);
       }
     }
-    return options.join();
+
+    return options.join('');
+  }
+
+  getImageElements() {
+    const images = this.product.images.map(image => {
+      return `
+        <li class="products-edit__imagelist-item sortable-list__item" style="">
+          <input type="hidden" name="url" value="${image.url}">
+          <input type="hidden" name="source" value="${image.source}">
+          <span>
+            <img src="icon-grab.svg" data-grab-handle="" alt="grab">
+            <img class="sortable-table__cell-img" alt="Image" src="${image.url}">
+            <span>${image.source}</span>
+          </span>
+          <button type="button">
+            <img src="icon-trash.svg" data-delete-handle="" alt="delete">
+          </button>
+        </li>
+      `;
+    });
+
+    return images.join('');
   }
 
   get template() {
@@ -76,26 +106,18 @@ export default class ProductForm {
           <div class="form-group form-group__half_left">
             <fieldset>
               <label class="form-label">Название товара</label>
-              <input required="" type="text" name="title" class="form-control" placeholder="Название товара">
+              <input id="title" required="" type="text" name="title" class="form-control" placeholder="Название товара">
             </fieldset>
           </div>
           <div class="form-group form-group__wide">
             <label class="form-label">Описание</label>
-            <textarea required="" class="form-control" name="description" data-element="productDescription" placeholder="Описание товара"></textarea>
+            <textarea id="description" required="" class="form-control" name="description" data-element="productDescription" placeholder="Описание товара"></textarea>
           </div>
           <div class="form-group form-group__wide" data-element="sortable-list-container">
             <label class="form-label">Фото</label>
-            <div data-element="imageListContainer"><ul class="sortable-list"><li class="products-edit__imagelist-item sortable-list__item" style="">
-              <input type="hidden" name="url" value="https://i.imgur.com/MWorX2R.jpg">
-              <input type="hidden" name="source" value="75462242_3746019958756848_838491213769211904_n.jpg">
-              <span>
-            <img src="icon-grab.svg" data-grab-handle="" alt="grab">
-            <img class="sortable-table__cell-img" alt="Image" src="https://i.imgur.com/MWorX2R.jpg">
-            <span>75462242_3746019958756848_838491213769211904_n.jpg</span>
-          </span>
-              <button type="button">
-                <img src="icon-trash.svg" data-delete-handle="" alt="delete">
-              </button></li></ul></div>
+            <div data-element="imageListContainer">
+                <ul class="sortable-list"></ul>
+            </div>
             <button type="button" name="uploadImage" class="button-primary-outline"><span>Загрузить</span></button>
           </div>
           <div class="form-group form-group__half_left">
@@ -106,20 +128,20 @@ export default class ProductForm {
           <div class="form-group form-group__half_left form-group__two-col">
             <fieldset>
               <label class="form-label">Цена ($)</label>
-              <input required="" type="number" name="price" class="form-control" placeholder="100">
+              <input id="price" required="" type="number" name="price" class="form-control" placeholder="100">
             </fieldset>
             <fieldset>
               <label class="form-label">Скидка ($)</label>
-              <input required="" type="number" name="discount" class="form-control" placeholder="0">
+              <input id="discount" required="" type="number" name="discount" class="form-control" placeholder="0">
             </fieldset>
           </div>
           <div class="form-group form-group__part-half">
             <label class="form-label">Количество</label>
-            <input required="" type="number" class="form-control" name="quantity" placeholder="1">
+            <input id="quantity" required="" type="number" class="form-control" name="quantity" placeholder="1">
           </div>
           <div class="form-group form-group__part-half">
             <label class="form-label">Статус</label>
-            <select class="form-control" name="status">
+            <select id="status" class="form-control" name="status">
               <option value="1">Активен</option>
               <option value="0">Неактивен</option>
             </select>
