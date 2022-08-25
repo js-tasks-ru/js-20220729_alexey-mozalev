@@ -10,15 +10,31 @@ export default class ProductForm {
   categories = [];
   productsUrl = `${BACKEND_URL}/api/rest/products`;
   categoriesUrl = `${BACKEND_URL}/api/rest/categories`;
+  imgurUrl = 'https://api.imgur.com/3/image';
 
   constructor(productId = '') {
     this.productId = productId;
   }
 
+  initEventListeners() {
+    this.subElements.productForm.elements.uploadImage.addEventListener('pointerdown', this.openFileUploadDialog);
+  }
+
+  saveEventHandler = (e) => {
+    e.preventDefault();
+    this.save();
+  }
+
+  openFileUploadDialog = (e) => {
+    const fileInput = document.getElementById('fileInput');
+    fileInput.click();
+    //TODO
+  }
+
   loadData = async () => {
     const categoriesUrl = new URL(this.categoriesUrl);
     Object.entries({
-      _sort: 'weight',
+      _sort: 'id',
       _refs: 'subcategory'
     }).forEach(([key, val]) => categoriesUrl.searchParams.append(key, val));
     const urls = [categoriesUrl];
@@ -42,6 +58,32 @@ export default class ProductForm {
 
     return data;
   };
+
+  save = async () => {
+    const url = new URL(this.productsUrl);
+
+    let data = {};
+    try {
+      data = await fetchJson(url, {
+        method: 'PATCH',
+        body: new FormData(this.subElements.productForm)
+      });
+
+    } catch (e) {
+      console.error('save Error:', e);
+    }
+
+    let saveEvent = new Event("product-updated");
+    this.element.dispatchEvent(saveEvent);
+
+    return data;
+  }
+
+  uploadImage = (e) => {
+    const url = new URL(this.imgurUrl);
+    let formData = new FormData();
+    //TODO
+  }
 
   getSubElements() {
     const result = {};
@@ -118,6 +160,7 @@ export default class ProductForm {
             <div data-element="imageListContainer">
                 <ul class="sortable-list"></ul>
             </div>
+            <input id="fileInput" type="file" accept="image/png, image/jpeg" hidden/>
             <button type="button" name="uploadImage" class="button-primary-outline"><span>Загрузить</span></button>
           </div>
           <div class="form-group form-group__half_left">
@@ -161,6 +204,9 @@ export default class ProductForm {
     wrapper.innerHTML = this.template;
     this.element = wrapper.firstElementChild;
     this.subElements = this.getSubElements();
+    this.subElements.productForm.onsubmit = this.saveEventHandler;
+
+    this.initEventListeners();
 
     await this.loadData();
     this.updateFormElements();
