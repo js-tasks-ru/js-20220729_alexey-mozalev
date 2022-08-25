@@ -17,7 +17,8 @@ export default class ProductForm {
   }
 
   initEventListeners() {
-    this.subElements.productForm.elements.uploadImage.addEventListener('pointerdown', this.openFileUploadDialog);
+    this.subElements.productForm.elements.uploadImage.addEventListener('pointerdown', this.openFileUploadDialogHandler);
+    this.subElements.fileInput.addEventListener('change', this.uploadImageHandler);
   }
 
   saveEventHandler = (e) => {
@@ -25,10 +26,34 @@ export default class ProductForm {
     this.save();
   }
 
-  openFileUploadDialog = (e) => {
-    const fileInput = document.getElementById('fileInput');
-    fileInput.click();
-    //TODO
+  openFileUploadDialogHandler = (e) => {
+    this.subElements.fileInput.click();
+  }
+
+  //TODO doesn't work
+  uploadImageHandler = async (e) => {
+    const file = [...this.subElements.fileInput.files];
+    console.log(e);
+
+    const url = new URL(this.imgurUrl);
+    const formData = new FormData();
+    formData.append('image', file[0], "apples.jpg");
+
+    const options = {
+      body: formData,
+      method: 'POST',
+      headers: {
+        Authorization: `Client-ID ${IMGUR_CLIENT_ID}`,
+        'Content-Type': 'multipart/form-data'
+      }
+    };
+
+    try {
+      const data = await fetchJson(url, options);
+      console.log('==imgur resp', data);
+    } catch (e) {
+      console.error('save Error:', e);
+    }
   }
 
   loadData = async () => {
@@ -77,12 +102,6 @@ export default class ProductForm {
     this.element.dispatchEvent(saveEvent);
 
     return data;
-  }
-
-  uploadImage = (e) => {
-    const url = new URL(this.imgurUrl);
-    let formData = new FormData();
-    //TODO
   }
 
   getSubElements() {
@@ -160,7 +179,7 @@ export default class ProductForm {
             <div data-element="imageListContainer">
                 <ul class="sortable-list"></ul>
             </div>
-            <input id="fileInput" type="file" accept="image/png, image/jpeg" hidden/>
+            <input data-element="fileInput" id="fileInput" type="file" accept="image/png, image/jpeg" hidden/>
             <button type="button" name="uploadImage" class="button-primary-outline"><span>Загрузить</span></button>
           </div>
           <div class="form-group form-group__half_left">
