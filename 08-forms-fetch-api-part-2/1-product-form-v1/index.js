@@ -30,22 +30,20 @@ export default class ProductForm {
     this.subElements.fileInput.click();
   }
 
-  //TODO doesn't work
   uploadImageHandler = async (e) => {
-    const file = [...this.subElements.fileInput.files];
-    console.log(e);
+    const file = this.subElements.fileInput.files[0];
 
     const url = new URL(this.imgurUrl);
     const formData = new FormData();
-    formData.append('image', file[0], "apples.jpg");
+    formData.append('image', file);
 
     const options = {
-      body: formData,
       method: 'POST',
       headers: {
         Authorization: `Client-ID ${IMGUR_CLIENT_ID}`,
-        'Content-Type': 'multipart/form-data'
-      }
+      },
+      referrer: '',
+      body: formData,
     };
 
     try {
