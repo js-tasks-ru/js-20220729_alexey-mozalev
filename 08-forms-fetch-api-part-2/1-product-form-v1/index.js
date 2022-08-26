@@ -10,7 +10,7 @@ export default class ProductForm {
   categories = [];
   productsUrl = new URL(`${BACKEND_URL}/api/rest/products`);
   categoriesUrl = new URL(`${BACKEND_URL}/api/rest/categories`);
-  imgurUrl = 'https://api.imgur.com/3/image';
+  imgurUrl = new URL('https://api.imgur.com/3/image');
 
   constructor(productId = '') {
     this.productId = productId;
@@ -33,8 +33,6 @@ export default class ProductForm {
 
   uploadImageHandler = async (e) => {
     const file = this.subElements.fileInput.files[0];
-
-    const url = new URL(this.imgurUrl);
     const formData = new FormData();
     formData.append('image', file);
 
@@ -48,7 +46,7 @@ export default class ProductForm {
     };
 
     try {
-      const data = await fetchJson(url, options);
+      const data = await fetchJson(this.imgurUrl, options);
       console.log('==imgur resp', data);
     } catch (e) {
       console.error('save Error:', e);
