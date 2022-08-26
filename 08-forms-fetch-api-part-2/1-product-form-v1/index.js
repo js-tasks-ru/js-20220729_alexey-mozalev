@@ -8,8 +8,8 @@ export default class ProductForm {
   subElements = {};
   product = null;
   categories = [];
-  productsUrl = `${BACKEND_URL}/api/rest/products`;
-  categoriesUrl = `${BACKEND_URL}/api/rest/categories`;
+  productsUrl = new URL(`${BACKEND_URL}/api/rest/products`);
+  categoriesUrl = new URL(`${BACKEND_URL}/api/rest/categories`);
   imgurUrl = 'https://api.imgur.com/3/image';
 
   constructor(productId = '') {
@@ -17,8 +17,9 @@ export default class ProductForm {
   }
 
   initEventListeners() {
-    this.subElements.productForm.elements.uploadImage.addEventListener('pointerdown', this.openFileUploadDialogHandler);
-    this.subElements.fileInput.addEventListener('change', this.uploadImageHandler);
+    const { productForm, fileInput } = this.subElements;
+    productForm.elements.uploadImage.addEventListener('pointerdown', this.openFileUploadDialogHandler);
+    fileInput.addEventListener('change', this.uploadImageHandler);
   }
 
   saveEventHandler = (e) => {
@@ -55,19 +56,17 @@ export default class ProductForm {
   }
 
   loadData = async () => {
-    const categoriesUrl = new URL(this.categoriesUrl);
     Object.entries({
       _sort: 'id',
       _refs: 'subcategory'
-    }).forEach(([key, val]) => categoriesUrl.searchParams.append(key, val));
-    const urls = [categoriesUrl];
+    }).forEach(([key, val]) => this.categoriesUrl.searchParams.append(key, val));
+    const urls = [this.categoriesUrl];
 
     if (this.productId) {
-      const productUrl = new URL(this.productsUrl);
       Object.entries({
         id: this.productId
-      }).forEach(([key, val]) => productUrl.searchParams.append(key, val));
-      urls.push(productUrl);
+      }).forEach(([key, val]) => this.productsUrl.searchParams.append(key, val));
+      urls.push(this.productsUrl);
     }
 
     let data = [];
@@ -83,13 +82,17 @@ export default class ProductForm {
   };
 
   save = async () => {
-    const url = new URL(this.productsUrl);
+    const formData = new FormData(this.subElements.productForm);
+    const formDataObj = Object.fromEntries(formData.entries());
 
     let data = {};
     try {
-      data = await fetchJson(url, {
+      data = await fetchJson(this.productsUrl, {
         method: 'PATCH',
-        body: new FormData(this.subElements.productForm)
+        headers: {
+          'Content-Type': 'application/json; charset=utf-8'
+        },
+        body: JSON.stringify(formDataObj)
       });
 
     } catch (e) {
