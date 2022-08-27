@@ -1,4 +1,4 @@
-// import SortableList from '../../2-sortable-list/src/index.js';
+import SortableList from '../2-sortable-list/index.js';
 import escapeHtml from './utils/escape-html.js';
 import fetchJson from './utils/fetch-json.js';
 
@@ -128,7 +128,10 @@ export default class ProductForm {
 
   updateFormElements() {
     this.subElements.productForm.elements['subcategory'].innerHTML = this.getCategoryElements();
-    this.subElements.imageListContainer.firstElementChild.innerHTML = this.getImageElements();
+    const sortableList = new SortableList({
+      items: this.product.images.map(this.getImageElement)
+    });
+    this.subElements.imageListContainer.firstElementChild.append(sortableList.element);
 
     for (const elem of this.subElements.productForm.elements) {
       const name = elem.getAttribute('name');
@@ -150,25 +153,24 @@ export default class ProductForm {
   }
 
   getImageElement(image) {
-    return `
-        <li class="products-edit__imagelist-item sortable-list__item" style="">
-          <input type="hidden" name="url" value="${image.url}">
-          <input type="hidden" name="source" value="${image.source}">
-          <span>
-            <img src="icon-grab.svg" data-grab-handle="" alt="grab">
-            <img class="sortable-table__cell-img" alt="Image" src="${image.url}">
-            <span>${image.source}</span>
-          </span>
-          <button type="button">
-            <img src="icon-trash.svg" data-delete-handle="" alt="delete">
-          </button>
-        </li>
-      `;
-  }
+    const wrapper = document.createElement('li');
 
-  getImageElements() {
-    const images = this.product.images.map(this.getImageElement);
-    return images.join('');
+    wrapper.innerHTML = `
+      <li class="products-edit__imagelist-item sortable-list__item" style="">
+        <input type="hidden" name="url" value="${image.url}">
+        <input type="hidden" name="source" value="${image.source}">
+        <span>
+          <img src="icon-grab.svg" data-grab-handle alt="grab">
+          <img class="sortable-table__cell-img" alt="Image" src="${image.url}">
+          <span>${image.source}</span>
+        </span>
+        <button type="button">
+          <img src="icon-trash.svg" data-delete-handle alt="delete">
+        </button>
+      </li>
+    `;
+
+    return wrapper.firstElementChild;
   }
 
   get template() {
