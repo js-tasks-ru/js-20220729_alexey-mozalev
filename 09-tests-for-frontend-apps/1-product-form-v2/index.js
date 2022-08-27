@@ -34,6 +34,10 @@ export default class ProductForm {
 
   uploadImageHandler = async (e) => {
     const file = this.subElements.fileInput.files[0];
+    if (!file) {
+      return;
+    }
+
     const formData = new FormData();
     formData.append('image', file);
 
@@ -47,11 +51,17 @@ export default class ProductForm {
     };
 
     try {
-      const data = await fetchJson(this.imgurUrl, options);
-      console.log('==imgur resp', data);
+      const { data } = await fetchJson(this.imgurUrl, options);
+
+      const wrapper = document.createElement('div');
+      wrapper.innerHTML = this.getImageElement({url: data.link, source: file.name});
+      const imageElement = wrapper.firstElementChild;
+      this.subElements.imageListContainer.firstElementChild.appendChild(imageElement);
     } catch (e) {
       console.error('save Error:', e);
     }
+
+    this.subElements.fileInput.value = '';
   };
 
   loadData = async () => {
@@ -139,9 +149,8 @@ export default class ProductForm {
     return options.join('');
   }
 
-  getImageElements() {
-    const images = this.product.images.map(image => {
-      return `
+  getImageElement(image) {
+    return `
         <li class="products-edit__imagelist-item sortable-list__item" style="">
           <input type="hidden" name="url" value="${image.url}">
           <input type="hidden" name="source" value="${image.source}">
@@ -155,8 +164,10 @@ export default class ProductForm {
           </button>
         </li>
       `;
-    });
+  }
 
+  getImageElements() {
+    const images = this.product.images.map(this.getImageElement);
     return images.join('');
   }
 
