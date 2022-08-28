@@ -7,6 +7,7 @@ const BACKEND_URL = 'https://course-js.javascript.ru';
 
 export default class ProductForm {
   subElements = {};
+  imagesSortableList = null;
   product = null;
   categories = [];
   productsUrl = new URL(`${BACKEND_URL}/api/rest/products`);
@@ -51,12 +52,13 @@ export default class ProductForm {
     };
 
     try {
-      const { data } = await fetchJson(this.imgurUrl, options);
-
-      const wrapper = document.createElement('div');
-      wrapper.innerHTML = this.getImageElement({url: data.link, source: file.name});
-      const imageElement = wrapper.firstElementChild;
-      this.subElements.imageListContainer.firstElementChild.appendChild(imageElement);
+      const {data} = await fetchJson(this.imgurUrl, options);
+      const imageElement = this.getImageElement(
+        {
+          url: data.link,
+          source: file.name
+        });
+      this.imagesSortableList.element.append(imageElement);
     } catch (e) {
       console.error('save Error:', e);
     }
@@ -126,12 +128,8 @@ export default class ProductForm {
     return result;
   }
 
-  updateFormElements() {
+  fillTheForm() {
     this.subElements.productForm.elements['subcategory'].innerHTML = this.getCategoryElements();
-    const sortableList = new SortableList({
-      items: this.product.images.map(this.getImageElement)
-    });
-    this.subElements.imageListContainer.firstElementChild.append(sortableList.element);
 
     for (const elem of this.subElements.productForm.elements) {
       const name = elem.getAttribute('name');
@@ -190,7 +188,6 @@ export default class ProductForm {
           <div class="form-group form-group__wide" data-element="sortable-list-container">
             <label class="form-label">Фото</label>
             <div data-element="imageListContainer">
-                <ul class="sortable-list"></ul>
             </div>
             <input data-element="fileInput" id="fileInput" type="file" accept="image/png, image/jpeg" hidden/>
             <button type="button" name="uploadImage" class="button-primary-outline"><span>Загрузить</span></button>
@@ -241,7 +238,14 @@ export default class ProductForm {
     this.initEventListeners();
 
     await this.loadData();
-    this.updateFormElements();
+
+    this.imagesSortableList = new SortableList({
+      items: this.product.images.map(this.getImageElement)
+    });
+    this.subElements.imageListContainer.append(this.imagesSortableList.element);
+
+    this.fillTheForm();
+
     return this.element;
   }
 
@@ -255,5 +259,6 @@ export default class ProductForm {
     this.remove();
     this.element = null;
     this.subElements = {};
+    this.imagesSortableList = null;
   }
 }

@@ -106,7 +106,7 @@ export default class SortableList {
 
   render() {
     const wrapper = document.createElement('div');
-    wrapper.innerHTML = '<ul></ul>';
+    wrapper.innerHTML = '<ul class="sortable-list"></ul>';
     this.element = wrapper.firstElementChild;
     this.items.map(item => this.element.append(item));
   }
