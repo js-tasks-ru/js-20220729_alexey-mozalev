@@ -129,9 +129,10 @@ export default class ProductForm {
   }
 
   fillTheForm() {
-    this.subElements.productForm.elements['subcategory'].innerHTML = this.getCategoryElements();
+    const { productForm } = this.subElements;
+    productForm.elements['subcategory'].innerHTML = this.getCategoryElements();
 
-    for (const elem of this.subElements.productForm.elements) {
+    for (const elem of productForm.elements) {
       const name = elem.getAttribute('name');
       if (this.product[name]) {
         elem.value = this.product[name];
