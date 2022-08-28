@@ -1,5 +1,9 @@
 export default class SortableList {
   pointerDownHandler = (event) => {
+    if (event.target.dataset['deleteHandle'] !== undefined) {
+      const image = event.target.closest('li');
+      image.remove();
+    }
     if (event.target.dataset['grabHandle'] === undefined) {
       return;
     }
