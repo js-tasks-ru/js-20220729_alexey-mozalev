@@ -26,7 +26,7 @@ export default class ProductForm {
 
   saveEventHandler = (e) => {
     e.preventDefault();
-    this.save();
+    this.save(e);
   };
 
   openFileUploadDialogHandler = (e) => {
@@ -92,18 +92,34 @@ export default class ProductForm {
     return data;
   };
 
-  save = async () => {
-    const formData = new FormData(this.subElements.productForm);
+  parseFormData(formData) {
     const formDataObj = Object.fromEntries(formData.entries());
+    console.log(formDataObj);
+
+    return {
+      description: formDataObj.description,
+      discount: Number(formDataObj.discount),
+      price: Number(formDataObj.price),
+      quantity: Number(formDataObj.quantity),
+      status: Number(formDataObj.status),
+      title: formDataObj.title,
+      images: this.product.images,
+      subcategory: formDataObj.subcategory
+    };
+  }
+
+  save = async (event) => {
+    const formData = new FormData(this.subElements.productForm);
+    const parsedFormData = this.parseFormData(formData);
 
     let data = {};
     try {
       data = await fetchJson(this.productsUrl, {
-        method: 'PATCH',
+        method: 'PUT',
         headers: {
           'Content-Type': 'application/json; charset=utf-8'
         },
-        body: JSON.stringify(formDataObj)
+        body: JSON.stringify(parsedFormData)
       });
 
     } catch (e) {
