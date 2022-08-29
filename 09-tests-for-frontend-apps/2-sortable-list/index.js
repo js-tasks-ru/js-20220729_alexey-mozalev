@@ -13,11 +13,13 @@ export default class SortableList {
     let shiftX = event.clientX - image.getBoundingClientRect().left;
     let shiftY = event.clientY - image.getBoundingClientRect().top;
 
-    let placeholder = getPlaceholderElement();
+    let placeholder = getPlaceholderElement(image);
     image.before(placeholder);
 
     image.style.position = 'absolute';
     image.style.zIndex = 1000;
+    image.classList.add('sortable-list__item_dragging');
+
     document.body.append(image);
 
     moveAt(event.pageX, event.pageY);
@@ -59,9 +61,9 @@ export default class SortableList {
       }
     }
 
-    function getPlaceholderElement() {
+    function getPlaceholderElement(elem) {
       const wrapper = document.createElement('div');
-      wrapper.innerHTML = '<li class="sortable-list__placeholder"></li>';
+      wrapper.innerHTML = `<div class="sortable-list__placeholder" style="width: ${elem.offsetWidth}px; height: ${elem.offsetHeight}px;"></div>`;
       return wrapper.firstElementChild;
     }
 
@@ -71,6 +73,7 @@ export default class SortableList {
       document.removeEventListener('pointermove', onPointerMove);
       image.onpointerup = null;
 
+      image.classList.remove('sortable-list__item_dragging');
       image.style.position = null;
       image.style.zIndex = null;
       image.style.top = null;
