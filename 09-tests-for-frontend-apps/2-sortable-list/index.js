@@ -1,21 +1,23 @@
 export default class SortableList {
   pointerDownHandler = (event) => {
+    const image = event.target.closest('li');
+
     if (event.target.dataset['deleteHandle'] !== undefined) {
-      const image = event.target.closest('li');
       image.remove();
     }
     if (event.target.dataset['grabHandle'] === undefined) {
       return;
     }
 
-    const image = event.target.closest('li');
-
-    let shiftX = event.clientX - image.getBoundingClientRect().left;
-    let shiftY = event.clientY - image.getBoundingClientRect().top;
+    const {left, top} = image.getBoundingClientRect();
+    let shiftX = event.clientX - left;
+    let shiftY = event.clientY - top;
 
     let placeholder = getPlaceholderElement(image);
-    image.before(placeholder);
+    image.after(placeholder);
     image.classList.add('sortable-list__item_dragging');
+    image.style.height = `${placeholder.offsetHeight}px`;
+    image.style.width = `${placeholder.offsetWidth}px`;
     moveAt(event.pageX, event.pageY);
 
     function moveAt(pageX, pageY) {
@@ -37,27 +39,28 @@ export default class SortableList {
       let droppableBelow = elemBelow.closest("li");
       if (this.currentDroppable !== droppableBelow) {
 
-        if (this.currentDroppable) {
-          // leaveDroppable(this.currentDroppable);
-          if (placeholder) {
-            placeholder.remove();
-          }
-        }
+        // if (this.currentDroppable) {
+        //   leaveDroppable(this.currentDroppable);
+        // }
 
         this.currentDroppable = droppableBelow;
 
         if (this.currentDroppable) {
           // enterDroppable(this.currentDroppable);
           if (placeholder) {
-            this.currentDroppable.before(placeholder);
+            if (event.movementY > 0) {
+              this.currentDroppable.after(placeholder);
+            } else if (event.movementY < 0) {
+              this.currentDroppable.before(placeholder);
+            }
           }
         }
       }
     }
 
-    function getPlaceholderElement(elem) {
+    function getPlaceholderElement({ offsetWidth, offsetHeight }) {
       const wrapper = document.createElement('div');
-      wrapper.innerHTML = `<div class="sortable-list__placeholder" style="width: ${elem.offsetWidth}px; height: ${elem.offsetHeight}px;"></div>`;
+      wrapper.innerHTML = `<div class="sortable-list__placeholder" style="width: ${offsetWidth}px; height: ${offsetHeight}px;"></div>`;
       return wrapper.firstElementChild;
     }
 
