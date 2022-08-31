@@ -15,18 +15,12 @@ export default class SortableList {
 
     let placeholder = getPlaceholderElement(image);
     image.before(placeholder);
-
-    image.style.position = 'absolute';
-    image.style.zIndex = 1000;
     image.classList.add('sortable-list__item_dragging');
-
-    document.body.append(image);
-
     moveAt(event.pageX, event.pageY);
 
     function moveAt(pageX, pageY) {
       image.style.left = pageX - shiftX + 'px';
-      image.style.top = pageY - shiftY + 'px';
+      image.style.top = pageY - shiftY - window.scrollY + 'px';
     }
 
     function onPointerMove(event) {
@@ -40,7 +34,7 @@ export default class SortableList {
         return;
       }
 
-      let droppableBelow = elemBelow.closest("li:not(.sortable-list__placeholder)");
+      let droppableBelow = elemBelow.closest("li");
       if (this.currentDroppable !== droppableBelow) {
 
         if (this.currentDroppable) {
@@ -73,13 +67,14 @@ export default class SortableList {
       document.removeEventListener('pointermove', onPointerMove);
       image.onpointerup = null;
 
+
+      placeholder.after(image);
       image.classList.remove('sortable-list__item_dragging');
       image.style.position = null;
       image.style.zIndex = null;
       image.style.top = null;
       image.style.left = null;
       image.style.visibility = null;
-      placeholder.after(image);
       placeholder.remove();
     };
 
