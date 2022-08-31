@@ -33,6 +33,14 @@ export default class ProductForm {
     this.subElements.fileInput.click();
   };
 
+  dispatchEvent(id) {
+    const event = id ?
+      new Event('product-updated', {detail: id}) :
+      new Event('product-saved');
+
+    this.element.dispatchEvent(event);
+  }
+
   uploadImageHandler = async (e) => {
     const file = this.subElements.fileInput.files[0];
     if (!file) {
@@ -115,7 +123,7 @@ export default class ProductForm {
     let data = {};
     try {
       data = await fetchJson(this.productsUrl, {
-        method: 'PUT',
+        method: this.productId ? 'PATCH' : 'PUT',
         headers: {
           'Content-Type': 'application/json; charset=utf-8'
         },
@@ -126,8 +134,7 @@ export default class ProductForm {
       console.error('save Error:', e);
     }
 
-    let saveEvent = new Event("product-updated");
-    this.element.dispatchEvent(saveEvent);
+    this.dispatchEvent(this.productId);
 
     return data;
   };
