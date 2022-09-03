@@ -100,6 +100,18 @@ export default class ProductForm {
     return data;
   };
 
+  getFormImages() {
+    const imagesElements = this.subElements.imageListContainer.querySelectorAll('.sortable-table__cell-img');
+    const images = [];
+    imagesElements.forEach(imgElem => {
+      images.push({
+        url: imgElem.src,
+        source: imgElem.nextElementSibling.textContent
+      });
+    });
+    return images;
+  }
+
   parseFormData(formData) {
     const formDataObj = Object.fromEntries(formData.entries());
     console.log(formDataObj);
@@ -111,7 +123,7 @@ export default class ProductForm {
       quantity: Number(formDataObj.quantity),
       status: Number(formDataObj.status),
       title: formDataObj.title,
-      images: this.product.images,
+      images: this.getFormImages(),
       subcategory: formDataObj.subcategory
     };
   }
@@ -123,7 +135,7 @@ export default class ProductForm {
     let data = {};
     try {
       data = await fetchJson(this.productsUrl, {
-        method: this.productId ? 'PATCH' : 'PUT',
+        method: this.productId ? 'PUT' : 'PATCH',
         headers: {
           'Content-Type': 'application/json; charset=utf-8'
         },
@@ -152,7 +164,7 @@ export default class ProductForm {
   }
 
   fillTheForm() {
-    const { productForm } = this.subElements;
+    const {productForm} = this.subElements;
     productForm.elements['subcategory'].innerHTML = this.getCategoryElements();
 
     for (const elem of productForm.elements) {
@@ -259,14 +271,14 @@ export default class ProductForm {
     this.subElements = this.getSubElements();
     this.subElements.productForm.onsubmit = this.saveEventHandler;
 
-    this.initEventListeners();
-
     await this.loadData();
 
     this.imagesSortableList = new SortableList({
       items: this.product.images.map(this.getImageElement)
     });
     this.subElements.imageListContainer.append(this.imagesSortableList.element);
+
+    this.initEventListeners();
 
     this.fillTheForm();
 
