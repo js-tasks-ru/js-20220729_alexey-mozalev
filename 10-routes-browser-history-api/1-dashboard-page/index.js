@@ -9,6 +9,7 @@ const BACKEND_URL = 'https://course-js.javascript.ru/';
 
 export default class Page {
   apiPath = `${BACKEND_URL}api/dashboard`;
+  components = [];
 
   onDateSelection = async (event) => {
     const {from, to} = event.detail;
@@ -26,48 +27,73 @@ export default class Page {
   }
 
   addComponents() {
-    this.addRangePickerElement();
-    this.addChartElements();
+    const from = new Date();
+    from.setMonth(from.getMonth() - 1);
+    const to = new Date();
+
+    this.addRangePickerElement(from, to);
+    this.addChartElements(from, to);
     this.addTableElement();
   }
 
-  addRangePickerElement() {
+  addRangePickerElement(from, to) {
     const topPanel = this.element.querySelector('.content__top-panel');
-    const rp = new RangePicker();
+    const rp = new RangePicker({from, to});
     rp.render();
     topPanel.append(rp.element);
+
+    this.components.push(rp);
   }
 
-  addChartElements = () => {
+  addChartElements = (from, to) => {
     const ordersChart = new ColumnChart({
       label: 'Orders',
       link: 'orders',
-      url: `${this.apiPath}/orders`
+      url: `${this.apiPath}/orders`,
+      range: {
+        from,
+        to
+      }
     });
 
     const salesChart = new ColumnChart({
       label: 'Sales',
       link: 'sales',
       formatHeading: p => `$${p}`,
-      url: `${this.apiPath}/sales`
+      url: `${this.apiPath}/sales`,
+      range: {
+        from,
+        to
+      }
     });
 
     const customersChart = new ColumnChart({
       label: 'Customers',
       link: 'customers',
-      url: `${this.apiPath}/customers`
+      url: `${this.apiPath}/customers`,
+      range: {
+        from,
+        to
+      }
     });
     this.charts = [ordersChart, salesChart, customersChart];
 
     this.subElements.ordersChart.append(ordersChart.element);
     this.subElements.salesChart.append(salesChart.element);
     this.subElements.customersChart.append(customersChart.element);
+
+    this.components.push(ordersChart, salesChart, customersChart);
   };
 
   addTableElement() {
-    const table = new SortableTable(header, {url: `${this.apiPath}/bestsellers`});
+    const table = new SortableTable(header, {
+      url: `${this.apiPath}/bestsellers`,
+      isSortLocally: true
+    });
     this.table = table;
     this.subElements.sortableTable.append(table.element);
+
+    this.components.push(table);
   }
 
   getSubElements() {
@@ -126,5 +152,10 @@ export default class Page {
 
   destroy() {
     this.remove();
+    this.subElements = null;
+
+    for (const component of this.components) {
+      component.destroy();
+    }
   }
 }
